@@ -1,6 +1,6 @@
 {
-  "homepage": "https://quoload.buildnship.in",
-  "name": "quickload",
+  "homepage": "https://quload.buildnship.in",
+  "name": "quload",
   "private": true,
   "version": "0.0.0",
   "type": "module",
