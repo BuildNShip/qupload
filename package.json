@@ -1,4 +1,5 @@
 {
+  "homepage": "https://quoload.buildnship.in",
   "name": "quickload",
   "private": true,
   "version": "0.0.0",
@@ -6,11 +7,14 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
     "framer-motion": "^11.0.6",
+    "gh-pages": "^6.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
