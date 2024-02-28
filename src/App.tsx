@@ -2,16 +2,23 @@ import styles from "./App.module.css";
 import { FaRegCopy } from "react-icons/fa";
 import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { getUniqueName, uploadFile } from "./apis/app";
 
 const App = () => {
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone();
-  const files = acceptedFiles.map((file) => (
-    <li key={file.name}>
-      {file.name} - {file.size} bytes
-    </li>
-  ));
+  const [uniqueName, setUniqueName] = useState("");
 
-  console.log(files);
+  useEffect(() => {
+    getUniqueName(setUniqueName);
+  }, []);
+
+  useEffect(() => {
+    if (uniqueName !== "")
+      acceptedFiles.forEach((file: File) => {
+        uploadFile(file, uniqueName);
+      });
+  }, [acceptedFiles]);
 
   return (
     <>
