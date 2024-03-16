@@ -1,24 +1,48 @@
 import styles from "./App.module.css";
-import { FaRegCopy } from "react-icons/fa";
+import { FaFile, FaRegCopy } from "react-icons/fa";
 import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import { getUniqueName, uploadFile } from "./apis/app";
 
 const App = () => {
-  const { acceptedFiles, getRootProps, getInputProps } = useDropzone();
-  const [uniqueName, setUniqueName] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const onDrop = (acceptedFiles: File[]) => {
+    console.log("File dropped");
+
+    if (files.find(file => acceptedFiles.map(afile => afile.name).includes(file.name))) {
+      toast.error("File already exists");
+      return;
+    }
+    else {
+      setFiles(prevFiles => [...prevFiles, ...acceptedFiles]);
+    }
+
+  }
+
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const [uniqueNames, setUniqueNames] = useState<string[]>([]);
 
   useEffect(() => {
-    getUniqueName(setUniqueName);
-  }, []);
+    if (files.length <= uniqueNames.length) return;
+    getUniqueName(setUniqueNames);
+    console.log(uniqueNames);
 
-  useEffect(() => {
-    if (uniqueName !== "")
-      acceptedFiles.forEach((file: File) => {
-        uploadFile(file, uniqueName);
+  }, [files]);
+
+  const onSubmit = () => {
+    if (uniqueNames.length > 0) {
+      files.forEach((file: File, index: number) => {
+        uploadFile(file, uniqueNames[index])
       });
-  }, [acceptedFiles]);
+    }
+    setFiles([]);
+    setUniqueNames([]);
+  }
+
+  console.log(files, uniqueNames);
+
 
   return (
     <>
@@ -51,9 +75,25 @@ const App = () => {
           <input {...getInputProps()} />
 
           <p className={styles.appText}>Drag and Drop Your Files</p>
+          <p className={styles.appOr}>or</p>
           <button className={styles.addButton}>Add Your Files</button>
         </div>
         <div className={styles.appLists}>
+          {files.length > 0 && (
+            <div className={styles.appFiles}>
+              <p>Added Files:</p>
+              <ul className={styles.fileListStyles}>
+                {files.map((file, index) => (
+                  <li key={index} className={styles.fileItemStyles}>
+                    <FaFile style={{ marginRight: '8px' }} /> {/* File icon */}
+                    {file.name}
+                  </li>
+                ))}
+              </ul>
+              <button className={styles.confirmButton} onClick={onSubmit}>Confirm</button>
+            </div>
+          )}
+
           <div className={styles.appList}>
             <p className={styles.appURL}>
               <a href="https://www.google.com">https://www.google.com</a>
@@ -63,7 +103,7 @@ const App = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div >
     </>
   );
 };
