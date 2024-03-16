@@ -52,6 +52,11 @@
   transition: all 0.3s ease;
 }
 
+.addButton:hover {
+  background-color: #5f6bff;
+
+}
+
 .appLists {
   margin-top: 2rem;
   display: flex;
@@ -84,4 +89,77 @@
   padding: 0.75rem;
   border-radius: 8px;
   color: white;
+}
+
+
+.appFiles li {
+  list-style: none;
+}
+
+.appFiles {
+  margin-top: 20px;
+  padding: 20px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: #f8f8f8;
+  width: calc(85% - 2rem);
+  color: #333;
+}
+
+.fileListStyles {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+  color: #333;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* Two columns with equal width */
+  gap: 5px;
+}
+
+.fileItemStyles {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #333;
+}
+
+.appOr {
+  color: #1d1d1d;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+
+}
+
+.confirmButton {
+  padding: 0.5rem 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  background-color: #2ecc71;
+  margin-top: 1rem;
+  width: 100%;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.confirmButton:hover {
+  background-color: #27ae60;
+  /* Change hover color as needed */
+}
+
+@media screen and (max-width: 600px) {
+
+  .fileListStyles {
+    grid-template-columns: 1fr;
+  }
+
 }
