@@ -1,10 +1,11 @@
 import styles from "./App.module.css";
-import { FaFile, FaRegCopy } from "react-icons/fa";
+import { FaRegCopy } from "react-icons/fa";
 import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { getUniqueName, uploadFile } from "./apis/app";
+import AddedFiles from "./components/AddedFiles";
+import { getUniqueName, listFile, uploadFile } from "./apis/app";
 
 const App = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -23,23 +24,45 @@ const App = () => {
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
   const [uniqueNames, setUniqueNames] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (files.length <= uniqueNames.length) return;
-    getUniqueName(setUniqueNames);
-    console.log(uniqueNames);
-
-  }, [files]);
+  const [fileLinks, setFileLinks] = useState<string[]>([]);
 
   const onSubmit = () => {
-    if (uniqueNames.length > 0) {
-      files.forEach((file: File, index: number) => {
-        uploadFile(file, uniqueNames[index])
+    if (files.length > 0) {
+      files.forEach(async (file: File) => {
+        console.log(fileLinks, file.name);
+        if (fileLinks.some(link => link.includes((file.name)))) {
+          toast.error("File Link already exists");
+          return;
+        }
+        const code = await getUniqueName(setUniqueNames);
+        if (code) {
+          await uploadFile(file, code)
+          console.log("File uploaded successfully");
+          const link = await listFile(code);
+          localStorage.setItem("files", JSON.stringify([...fileLinks, link]));
+          setFileLinks(prevLinks => [...prevLinks, link]);
+        }
       });
     }
-    setFiles([]);
-    setUniqueNames([]);
   }
+
+  useEffect(() => {
+    if (fileLinks.length != 0) {
+      setFileLinks([]);
+      JSON.parse(localStorage.getItem("files") || "[]")
+        .forEach((link: string) => setFileLinks(prevLinks => [...prevLinks, link]));
+    }
+
+  }, [])
+
+  const handleCopy = async (textToCopy: string) => {
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      toast.success('Text copied to clipboard');
+    } catch (err) {
+      toast.error('Failed to copy text');
+    }
+  };
 
   console.log(files, uniqueNames);
 
@@ -79,29 +102,23 @@ const App = () => {
           <button className={styles.addButton}>Add Your Files</button>
         </div>
         <div className={styles.appLists}>
-          {files.length > 0 && (
-            <div className={styles.appFiles}>
-              <p>Added Files:</p>
-              <ul className={styles.fileListStyles}>
-                {files.map((file, index) => (
-                  <li key={index} className={styles.fileItemStyles}>
-                    <FaFile style={{ marginRight: '8px' }} /> {/* File icon */}
-                    {file.name}
-                  </li>
-                ))}
-              </ul>
-              <button className={styles.confirmButton} onClick={onSubmit}>Confirm</button>
+          <AddedFiles files={files} setFiles={setFiles} onSubmit={onSubmit} />
+          {fileLinks.length > 0 &&
+            <div className={styles.appList}>
+              {fileLinks.map((link, index) => (
+                <div className={styles.appListItem}>
+                  <p key={index} className={styles.appURL}>
+                    <a href={link} target="_blank" rel="noreferrer" className={styles.ellipsis}>{link}</a>
+                  </p>
+                  <button className={styles.copyButton} onClick={() => handleCopy(link)}>
+                    <FaRegCopy style={{ marginRight: '8px' }} />
+                  </button>
+                </div>
+              ))}
             </div>
-          )}
+          }
 
-          <div className={styles.appList}>
-            <p className={styles.appURL}>
-              <a href="https://www.google.com">https://www.google.com</a>
-            </p>
-            <button className={styles.copyButton}>
-              <FaRegCopy size={15} />
-            </button>
-          </div>
+
         </div>
       </div >
     </>
