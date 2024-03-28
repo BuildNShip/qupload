@@ -23,34 +23,43 @@ const App = () => {
   }
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
-  const [uniqueNames, setUniqueNames] = useState<string[]>([]);
+  const [, setUniqueName] = useState<string>("");
   const [fileLinks, setFileLinks] = useState<string[]>([]);
-
-  const onSubmit = () => {
+  const [fileCodes, setFileCodes] = useState<string[]>([]);
+  const [code, setCode] = useState<string | undefined>(undefined);
+  const onSubmit = async () => {
     if (files.length > 0) {
+      if (!code) {
+        setCode(await getUniqueName(setUniqueName) as string);
+      }
       files.forEach(async (file: File) => {
         console.log(fileLinks, file.name);
         if (fileLinks.some(link => link.includes((file.name)))) {
           toast.error("File Link already exists");
           return;
         }
-        const code = await getUniqueName(setUniqueNames);
         if (code) {
           await uploadFile(file, code)
           console.log("File uploaded successfully");
           const link = await listFile(code);
-          localStorage.setItem("files", JSON.stringify([...fileLinks, link]));
-          setFileLinks(prevLinks => [...prevLinks, link]);
+          localStorage.setItem("files", JSON.stringify([...new Set([...fileCodes, code])]));
+          setFileLinks(prevLinks => [...new Set([...prevLinks, ...link])]);
         }
       });
     }
   }
 
   useEffect(() => {
-    if (fileLinks.length != 0) {
-      setFileLinks([]);
-      JSON.parse(localStorage.getItem("files") || "[]")
-        .forEach((link: string) => setFileLinks(prevLinks => [...prevLinks, link]));
+
+    const codes: string[] = JSON.parse(localStorage.getItem("files") || "[]")
+
+    if (codes.length > 0) {
+
+      setFileCodes(prevCodes => [...new Set([...prevCodes, ...codes])]);
+      codes.forEach(async (code: string) => {
+        const link = await listFile(code);
+        setFileLinks(prevLinks => [...new Set([...prevLinks, ...link])]);
+      });
     }
 
   }, [])
@@ -63,8 +72,6 @@ const App = () => {
       toast.error('Failed to copy text');
     }
   };
-
-  console.log(files, uniqueNames);
 
 
   return (
