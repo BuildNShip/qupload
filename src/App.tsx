@@ -1,11 +1,11 @@
 import styles from "./App.module.css";
-import { FaRegCopy } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
 import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import AddedFiles from "./components/AddedFiles";
-import { getUniqueName, listFile, uploadFile } from "./apis/app";
+import { downloadFile, getUniqueName, listFile, uploadFile } from "./apis/app";
 
 const App = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -24,56 +24,52 @@ const App = () => {
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
   const [, setUniqueName] = useState<string>("");
-  const [fileLinks, setFileLinks] = useState<string[]>([]);
   const [fileCodes, setFileCodes] = useState<string[]>([]);
   const [code, setCode] = useState<string | undefined>(undefined);
+
+
   const onSubmit = async () => {
     if (files.length > 0) {
       if (!code) {
         setCode(await getUniqueName(setUniqueName) as string);
       }
       files.forEach(async (file: File) => {
-        console.log(fileLinks, file.name);
-        if (fileLinks.some(link => link.includes((file.name)))) {
-          toast.error("File Link already exists");
-          return;
-        }
         if (code) {
           await uploadFile(file, code)
-          console.log("File uploaded successfully");
-          const link = await listFile(code);
+          setFileCodes(prevCodes => [...new Set([...prevCodes, code])]);
           localStorage.setItem("files", JSON.stringify([...new Set([...fileCodes, code])]));
-          setFileLinks(prevLinks => [...new Set([...prevLinks, ...link])]);
         }
       });
     }
   }
+
+  const handleDownload = async (code: string) => {
+    try {
+      const links = await listFile(code);
+      console.log(links)
+      for (const link of links) {
+        downloadFile(link);
+      }
+
+      toast.success('Files Downloading...');
+    }
+    catch (err) {
+      console.error(err);
+      toast.error("Unable to Download");
+    }
+  };
 
   useEffect(() => {
 
     const codes: string[] = JSON.parse(localStorage.getItem("files") || "[]")
 
     if (codes.length > 0) {
-
       setFileCodes(prevCodes => [...new Set([...prevCodes, ...codes])]);
-      codes.forEach(async (code: string) => {
-        const link = await listFile(code);
-        setFileLinks(prevLinks => [...new Set([...prevLinks, ...link])]);
-      });
     }
 
   }, [])
 
-  const handleCopy = async (textToCopy: string) => {
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      toast.success('Text copied to clipboard');
-    } catch (err) {
-      toast.error('Failed to copy text');
-    }
-  };
-
-
+  console.log(fileCodes)
   return (
     <>
       <div className={styles.appHeader}>
@@ -110,15 +106,15 @@ const App = () => {
         </div>
         <div className={styles.appLists}>
           <AddedFiles files={files} setFiles={setFiles} onSubmit={onSubmit} />
-          {fileLinks.length > 0 &&
+          {fileCodes.length > 0 &&
             <div className={styles.appList}>
-              {fileLinks.map((link, index) => (
+              {fileCodes.map((code, index) => (
                 <div className={styles.appListItem}>
                   <p key={index} className={styles.appURL}>
-                    <a href={link} target="_blank" rel="noreferrer" className={styles.ellipsis}>{link}</a>
+                    <a href={code} target="_blank" rel="noreferrer" className={styles.ellipsis}>{code}</a>
                   </p>
-                  <button className={styles.copyButton} onClick={() => handleCopy(link)}>
-                    <FaRegCopy style={{ marginRight: '8px' }} />
+                  <button className={styles.copyButton} onClick={() => handleDownload(code)}>
+                    <FaDownload style={{ marginRight: '8px' }} />
                   </button>
                 </div>
               ))}
