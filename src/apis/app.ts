@@ -61,3 +61,23 @@ export const listFile = (uniqueName: string): Promise<string[]> => {
       });
   })
 }
+
+export const downloadFile = (link: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    fetch(link, { mode: 'no-cors', method: 'GET' })
+      .then(async (response) => {
+        const url = URL.createObjectURL(await response.blob());
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = link.substring(link.lastIndexOf("/") + 1);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  })
+}
