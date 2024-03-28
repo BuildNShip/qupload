@@ -3,14 +3,14 @@ import { Dispatch } from "react";
 import { toast } from "react-hot-toast";
 
 export const getUniqueName = (
-  setUniqueNames: Dispatch<React.SetStateAction<string[]>>
+  setUniqueNames: Dispatch<React.SetStateAction<string>>
 ): Promise<string | undefined> => {
   return new Promise((resolve, reject) => {
     axios
       .post(`${import.meta.env.VITE_BACKEND_URL}qupload/get-unique-name/`)
       .then((response) => {
         console.log(response.data);
-        setUniqueNames((prevNames) => ([...prevNames, response.data.response.unique_code]));
+        setUniqueNames(response.data.response.unique_code);
         resolve(response.data.response.unique_code);
       })
       .catch((error) => {
@@ -49,12 +49,12 @@ export const uploadFile = (acceptedFile: File, uniqueName: string): Promise<void
   });
 };
 
-export const listFile = (uniqueName: string): Promise<string> => {
+export const listFile = (uniqueName: string): Promise<string[]> => {
   return new Promise((resolve, reject) => {
     axios
       .get(`${import.meta.env.VITE_BACKEND_URL}qupload/files/${uniqueName}`)
       .then((response) => {
-        resolve(response.data.response.files[0]);
+        resolve(response.data.response.files);
       })
       .catch((error) => {
         reject(error);
