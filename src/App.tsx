@@ -1,5 +1,5 @@
 import styles from "./App.module.css";
-import { FaDownload } from "react-icons/fa";
+import { FaDownload, FaGithub, FaInstagram, FaTelegram, FaTwitter } from "react-icons/fa";
 import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -8,12 +8,13 @@ import AddedFiles from "./components/AddedFiles";
 import { downloadFiles, getUniqueName, listFile, uploadFile } from "./apis/app";
 import RemainingTime from "./components/RemainingTime";
 
+export type LocalData = {
+    code: string;
+    totalFiles: number;
+    uploadTime: Date;
+};
+
 const App = () => {
-    type LocalData = {
-        code: string;
-        totalFiles: number;
-        uploadTime: Date;
-    };
     const [files, setFiles] = useState<File[]>([]);
     const [, setUniqueName] = useState<string>("");
     const [fileCodes, setFileCodes] = useState<LocalData[]>([]);
@@ -33,6 +34,12 @@ const App = () => {
     };
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
+    const removeFile = (file: LocalData) => {
+        const newFiles = fileCodes.filter((f) => f.code !== file.code);
+        setFileCodes(newFiles);
+        localStorage.setItem("files", JSON.stringify(newFiles));
+    };
 
     useEffect(() => {
         files.forEach(async (file: File) => {
@@ -65,8 +72,7 @@ const App = () => {
             if (!code) {
                 setCode((await getUniqueName(setUniqueName)) as string);
             }
-        }
-        else {
+        } else {
             toast.error("Please select a file to upload");
         }
     };
@@ -76,7 +82,6 @@ const App = () => {
             const links = await listFile(code);
 
             for (const link of links) {
-                
                 downloadFiles(link);
             }
 
@@ -131,6 +136,10 @@ const App = () => {
                     <input {...getInputProps()} />
 
                     <p className={styles.appText}>Drag and Drop Your Files</p>
+                    <p className={styles.appTagline}>
+                        We only files for duration of 2 days, kindly make sure
+                        that your usecase is within the limit
+                    </p>
                     <p className={styles.appOr}>or</p>
                     <button className={styles.addButton}>Add Your Files</button>
                 </div>
@@ -161,7 +170,10 @@ const App = () => {
                                         </p>
 
                                         <p className={styles.timeLeft}>
-                                            <RemainingTime expirationDateTime={file.uploadTime} />
+                                            <RemainingTime
+                                                file={file}
+                                                removeFile={removeFile}
+                                            />
                                         </p>
 
                                         <button
@@ -177,6 +189,25 @@ const App = () => {
                             ))}
                         </div>
                     )}
+                </div>
+            </div>
+            <div className={styles.footer}>
+                <a href="https://buildnship.in/">
+                    <img src="/buildnship.png" alt="logo" />
+                </a>
+                <div className={styles.social_container}>
+                    <a href="https://twitter.com/buildnship/">
+                        <FaTwitter size={25} color="#8095ff" />
+                    </a>
+                    <a href="https://instagram.com/buildnship?igshid=YmMyMTA2M2Y=">
+                        <FaInstagram size={25} color="#8095ff" />
+                    </a>
+                    <a href="https://github.com/BuildNShip">
+                        <FaGithub size={25} color="#8095ff" />
+                    </a>
+                    <a href="https://t.me/buildnship">
+                        <FaTelegram size={25} color="#8095ff" />
+                    </a>
                 </div>
             </div>
         </>

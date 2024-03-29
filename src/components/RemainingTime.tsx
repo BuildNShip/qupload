@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
+import { LocalData } from "../App";
 
 const RemainingTime = ({
-    expirationDateTime,
+    file,
+    removeFile,
 }: {
-    expirationDateTime: Date;
+    file: LocalData;
+    removeFile: (file: LocalData) => void;
 }) => {
     const [remainingTime, setRemainingTime] = useState("");
 
     useEffect(() => {
         const calculateRemainingTime = () => {
-            const expirationDate = new Date(expirationDateTime);
+            const expirationDate = new Date(file.uploadTime);
             expirationDate.setDate(expirationDate.getDate() + 2);
             const currentDate = new Date();
 
@@ -20,6 +23,7 @@ const RemainingTime = ({
             if (timeDifference < 0) {
                 // If expiration date has passed
                 setRemainingTime("Expired");
+                removeFile(file);
             } else {
                 // Convert time difference to days, hours, minutes, and seconds
                 const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
@@ -51,7 +55,7 @@ const RemainingTime = ({
         const interval = setInterval(calculateRemainingTime, 1000);
 
         return () => clearInterval(interval);
-    }, [expirationDateTime]);
+    }, [file.uploadTime]);
 
     return <div> {remainingTime}</div>;
 };

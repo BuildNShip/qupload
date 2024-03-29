@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 88vh;
+    height: 82vh;
     background-color: #fafafa;
     color: white;
 }
@@ -16,7 +16,6 @@
 .appText {
     font-size: 2rem;
     font-weight: 700;
-    margin-bottom: 1rem;
     color: #1d1d1d;
 }
 
@@ -85,7 +84,7 @@
 }
 
 .copyButton {
-    background-color: #afbcff;
+    background-color: #8095ff;
     border: none;
     padding: 0.75rem;
     border-radius: 8px;
@@ -111,10 +110,71 @@
     padding: 5px;
 }
 
-
 .actions {
     display: flex;
     gap: 1rem;
     align-items: center;
     color: #1d1d1d;
+}
+
+.appTagline {
+    font-size: 1.05rem;
+    font-weight: 300;
+    max-width: 25rem;
+    color: #1d1d1d;
+    text-align: center;
+}
+
+/* CSS code */
+.csv_icon:hover {
+    color: #2ba6a6 !important;
+    cursor: pointer;
+}
+
+.footer {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    position: fixed;
+    height: 3rem;
+    border-top: 2px solid #8095ff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color:#ebeeff;
+}
+
+.footer a {
+    width: 100px;
+}
+
+.footer a img {
+    width: 100px;
+    height: 60%;
+    margin-left: 40px;
+}
+
+.social_container {
+    width: max-content;
+    height: 100%;
+    display: flex;
+    gap: 15px;
+    margin-right: 20px;
+}
+
+.footer .social_container a {
+    height: 100%;
+    width: max-content;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+@media only screen and (max-width: 600px) {
+    .footer a img {
+        margin-left: 14px;
+    }
+    .footer .social_container {
+        gap: 8px;
+    }
 }

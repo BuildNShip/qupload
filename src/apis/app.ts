@@ -4,71 +4,71 @@ import { toast } from "react-hot-toast";
 import fileDownload from "js-file-download";
 
 export const getUniqueName = (
-  setUniqueNames: Dispatch<React.SetStateAction<string>>
+    setUniqueNames: Dispatch<React.SetStateAction<string>>
 ): Promise<string | undefined> => {
-  return new Promise((resolve, reject) => {
-    axios
-      .post(`${import.meta.env.VITE_BACKEND_URL}qupload/get-unique-name/`)
-      .then((response) => {
-        console.log(response.data);
-        setUniqueNames(response.data.response.unique_code);
-        resolve(response.data.response.unique_code);
-      })
-      .catch((error) => {
-        console.error(error);
-        reject(error);
-      });
-  });
+    return new Promise((resolve, reject) => {
+        axios
+            .post(`${import.meta.env.VITE_BACKEND_URL}qupload/get-unique-name/`)
+            .then((response) => {
+                console.log(response.data);
+                setUniqueNames(response.data.response.unique_code);
+                resolve(response.data.response.unique_code);
+            })
+            .catch((error) => {
+                console.error(error);
+                reject(error);
+            });
+    });
 };
 
 export const uploadFile = (
-  acceptedFile: File,
-  uniqueName: string
+    acceptedFile: File,
+    uniqueName: string
 ): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const formData = new FormData();
-    formData.append("file", acceptedFile);
-    formData.append("unique_name", uniqueName);
-    const loader = toast.loading("Uploading...");
-    axios
-      .post(
-        `${import.meta.env.VITE_BACKEND_URL}qupload/files/`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      )
-      .then((response) => {
-        console.log(response.data);
-        toast.success(response.data.message.general);
-        resolve();
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error(error);
-        reject(error);
-      })
-      .finally(() => {
-        toast.dismiss(loader);
-      });
-  });
+    return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("file", acceptedFile);
+        formData.append("unique_name", uniqueName);
+        const loader = toast.loading("Uploading...");
+        axios
+            .post(
+                `${import.meta.env.VITE_BACKEND_URL}qupload/files/`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            )
+            .then((response) => {
+                console.log(response.data);
+                toast.success(response.data.message.general);
+                resolve();
+            })
+            .catch((error) => {
+                console.error(error);
+                toast.error(error);
+                reject(error);
+            })
+            .finally(() => {
+                toast.dismiss(loader);
+            });
+    });
 };
 
 export const listFile = (uniqueName: string): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    axios
-      .get(
-        `${import.meta.env.VITE_BACKEND_URL}qupload/files/${uniqueName}`
-      )
-      .then((response) => {
-        resolve(response.data.response.files);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+    return new Promise((resolve, reject) => {
+        axios
+            .get(
+                `${import.meta.env.VITE_BACKEND_URL}qupload/files/${uniqueName}`
+            )
+            .then((response) => {
+                resolve(response.data.response.files);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
 };
 
 // export const downloadFiles = (link: string): Promise<void> => {
@@ -93,20 +93,41 @@ export const listFile = (uniqueName: string): Promise<string[]> => {
 //   });
 // };
 
+// export const downloadFiles = (link: string): void => {
+//   axios
+//     .get(link, {
+//       responseType: "blob",
+//       headers: { "Access-Control-Allow-Origin": "*" },
+//     })
+//     .then((response) => {
+//       fileDownload(
+//         response.data,
+//         link.substring(link.lastIndexOf("/") + 1)
+//       );
+//     })
+//     .catch((error) => {
+//       console.error(error);
+//       toast.error("Unable to Download");
+//     });
+// };
+
 export const downloadFiles = (link: string): void => {
-  axios
-    .get("http://cors-anywhere.herokuapp.com/" + link, {
-      responseType: "blob",
-      headers: { "Access-Control-Allow-Origin": "*" },
-    })
-    .then((response) => {
-      fileDownload(
-        response.data,
-        link.substring(link.lastIndexOf("/") + 1)
-      );
-    })
-    .catch((error) => {
-      console.error(error);
-      toast.error("Unable to Download");
-    });
+    axios
+        .get(link, {
+            responseType: "blob",
+            headers: { "Access-Control-Allow-Origin": "*" },
+        })
+        .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", link.href);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        })
+        .catch((error) => {
+            console.error(error);
+            toast.error("Unable to Download");
+        });
 };
