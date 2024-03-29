@@ -8,9 +8,14 @@ import AddedFiles from "./components/AddedFiles";
 import { downloadFile, getUniqueName, listFile, uploadFile } from "./apis/app";
 
 const App = () => {
+    type LocalData = {
+        code: string;
+        totalFiles: number;
+        uploadTime: string;
+    };
     const [files, setFiles] = useState<File[]>([]);
     const [, setUniqueName] = useState<string>("");
-    const [fileCodes, setFileCodes] = useState<string[]>([]);
+    const [fileCodes, setFileCodes] = useState<LocalData[]>([]);
     const [code, setCode] = useState<string | undefined>(undefined);
 
     const onDrop = (acceptedFiles: File[]) => {
@@ -32,13 +37,23 @@ const App = () => {
         files.forEach(async (file: File) => {
             if (code) {
                 await uploadFile(file, code);
-                setFileCodes((prevCodes) => [...new Set([...prevCodes, code])]);
-                localStorage.setItem(
-                    "files",
-                    JSON.stringify([...new Set([...fileCodes, code])])
-                );
             }
         });
+
+        if (!code) return;
+        
+        let localData = {
+            code: code,
+            totalFiles: files.length,
+            uploadTime: new Date().toLocaleString(),
+        };
+
+        setFileCodes((prevCodes) => [...new Set([...prevCodes, localData])]);
+
+        localStorage.setItem(
+            "files",
+            JSON.stringify([...new Set([...fileCodes, localData])])
+        );
 
         setFiles([]);
     }, [code]);
@@ -68,16 +83,13 @@ const App = () => {
     };
 
     useEffect(() => {
-        const codes: string[] = JSON.parse(
+        const codes: LocalData[] = JSON.parse(
             localStorage.getItem("files") || "[]"
         );
 
-        if (codes.length > 0) {
-            setFileCodes((prevCodes) => [...new Set([...prevCodes, ...codes])]);
-        }
+        setFileCodes(codes);
     }, []);
 
-    console.log(fileCodes);
     return (
         <>
             <div className={styles.appHeader}>
@@ -124,21 +136,23 @@ const App = () => {
                     />
                     {fileCodes.length > 0 && (
                         <div className={styles.appList}>
-                            {fileCodes.map((code, index) => (
+                            {fileCodes.map((file, index) => (
                                 <div className={styles.appListItem}>
                                     <p key={index} className={styles.appURL}>
                                         <a
-                                            href={code}
+                                            href={file.code}
                                             target="_blank"
                                             rel="noreferrer"
                                             className={styles.ellipsis}
                                         >
-                                            {code}
+                                            {file.code}
                                         </a>
                                     </p>
                                     <button
                                         className={styles.copyButton}
-                                        onClick={() => handleDownload(code)}
+                                        onClick={() =>
+                                            handleDownload(file.code)
+                                        }
                                     >
                                         <FaDownload />
                                     </button>
