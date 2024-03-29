@@ -5,13 +5,14 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import AddedFiles from "./components/AddedFiles";
-import { downloadFile, getUniqueName, listFile, uploadFile } from "./apis/app";
+import { downloadFiles, getUniqueName, listFile, uploadFile } from "./apis/app";
+import RemainingTime from "./components/RemainingTime";
 
 const App = () => {
     type LocalData = {
         code: string;
         totalFiles: number;
-        uploadTime: string;
+        uploadTime: Date;
     };
     const [files, setFiles] = useState<File[]>([]);
     const [, setUniqueName] = useState<string>("");
@@ -41,11 +42,11 @@ const App = () => {
         });
 
         if (!code) return;
-        
+
         let localData = {
             code: code,
             totalFiles: files.length,
-            uploadTime: new Date().toLocaleString(),
+            uploadTime: new Date(),
         };
 
         setFileCodes((prevCodes) => [...new Set([...prevCodes, localData])]);
@@ -56,6 +57,7 @@ const App = () => {
         );
 
         setFiles([]);
+        setCode(undefined);
     }, [code]);
 
     const onSubmit = async () => {
@@ -64,6 +66,9 @@ const App = () => {
                 setCode((await getUniqueName(setUniqueName)) as string);
             }
         }
+        else {
+            toast.error("Please select a file to upload");
+        }
     };
 
     const handleDownload = async (code: string) => {
@@ -71,7 +76,8 @@ const App = () => {
             const links = await listFile(code);
 
             for (const link of links) {
-                downloadFile(link);
+                
+                downloadFiles(link);
             }
 
             toast.success("Files Downloading...");
@@ -148,14 +154,25 @@ const App = () => {
                                             {file.code}
                                         </a>
                                     </p>
-                                    <button
-                                        className={styles.copyButton}
-                                        onClick={() =>
-                                            handleDownload(file.code)
-                                        }
-                                    >
-                                        <FaDownload />
-                                    </button>
+
+                                    <div className={styles.actions}>
+                                        <p className={styles.totalFiles}>
+                                            {file.totalFiles} Files
+                                        </p>
+
+                                        <p className={styles.timeLeft}>
+                                            <RemainingTime expirationDateTime={file.uploadTime} />
+                                        </p>
+
+                                        <button
+                                            className={styles.copyButton}
+                                            onClick={() =>
+                                                handleDownload(file.code)
+                                            }
+                                        >
+                                            <FaDownload />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
