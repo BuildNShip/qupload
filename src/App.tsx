@@ -196,16 +196,16 @@ const App = () => {
                     <img src="/buildnship.png" alt="logo" />
                 </a>
                 <div className={styles.social_container}>
-                    <a href="https://twitter.com/buildnship/">
+                    <a href="https://twitter.com/buildnship/" target="_blank" rel="noreferrer">
                         <FaTwitter size={25} color="#8095ff" />
                     </a>
-                    <a href="https://instagram.com/buildnship?igshid=YmMyMTA2M2Y=">
+                    <a href="https://instagram.com/buildnship?igshid=YmMyMTA2M2Y=" target="_blank" rel="noreferrer">
                         <FaInstagram size={25} color="#8095ff" />
                     </a>
-                    <a href="https://github.com/BuildNShip">
+                    <a href="https://github.com/BuildNShip" target="_blank" rel="noreferrer">
                         <FaGithub size={25} color="#8095ff" />
                     </a>
-                    <a href="https://t.me/buildnship">
+                    <a href="https://t.me/buildnship" target="_blank" rel="noreferrer">
                         <FaTelegram size={25} color="#8095ff" />
                     </a>
                 </div>

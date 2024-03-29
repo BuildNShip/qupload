@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Dispatch } from "react";
 import { toast } from "react-hot-toast";
-import fileDownload from "js-file-download";
 
 export const getUniqueName = (
     setUniqueNames: Dispatch<React.SetStateAction<string>>
@@ -91,24 +90,6 @@ export const listFile = (uniqueName: string): Promise<string[]> => {
 //         reject(error);
 //       });
 //   });
-// };
-
-// export const downloadFiles = (link: string): void => {
-//   axios
-//     .get(link, {
-//       responseType: "blob",
-//       headers: { "Access-Control-Allow-Origin": "*" },
-//     })
-//     .then((response) => {
-//       fileDownload(
-//         response.data,
-//         link.substring(link.lastIndexOf("/") + 1)
-//       );
-//     })
-//     .catch((error) => {
-//       console.error(error);
-//       toast.error("Unable to Download");
-//     });
 // };
 
 export const downloadFiles = (link: string): void => {
