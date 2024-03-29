@@ -9,9 +9,11 @@ import { downloadFile, getUniqueName, listFile, uploadFile } from "./apis/app";
 
 const App = () => {
     const [files, setFiles] = useState<File[]>([]);
-    const onDrop = (acceptedFiles: File[]) => {
-        console.log("File dropped");
+    const [, setUniqueName] = useState<string>("");
+    const [fileCodes, setFileCodes] = useState<string[]>([]);
+    const [code, setCode] = useState<string | undefined>(undefined);
 
+    const onDrop = (acceptedFiles: File[]) => {
         if (
             files.find((file) =>
                 acceptedFiles.map((afile) => afile.name).includes(file.name)
@@ -25,42 +27,43 @@ const App = () => {
     };
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop });
-    const [, setUniqueName] = useState<string>("");
-    const [fileCodes, setFileCodes] = useState<string[]>([]);
-    const [code, setCode] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        files.forEach(async (file: File) => {
+            if (code) {
+                await uploadFile(file, code);
+                setFileCodes((prevCodes) => [...new Set([...prevCodes, code])]);
+                localStorage.setItem(
+                    "files",
+                    JSON.stringify([...new Set([...fileCodes, code])])
+                );
+            }
+        });
+
+        setFiles([]);
+    }, [code]);
 
     const onSubmit = async () => {
         if (files.length > 0) {
             if (!code) {
                 setCode((await getUniqueName(setUniqueName)) as string);
             }
-            files.forEach(async (file: File) => {
-                if (code) {
-                    await uploadFile(file, code);
-                    setFileCodes((prevCodes) => [
-                        ...new Set([...prevCodes, code]),
-                    ]);
-                    localStorage.setItem(
-                        "files",
-                        JSON.stringify([...new Set([...fileCodes, code])])
-                    );
-                }
-            });
         }
     };
 
     const handleDownload = async (code: string) => {
         try {
             const links = await listFile(code);
-            console.log(links);
+
             for (const link of links) {
                 downloadFile(link);
             }
 
             toast.success("Files Downloading...");
-        } catch (err) {
-            console.error(err);
-            toast.error("Unable to Download");
+        } catch (error: any) {
+            toast.error(
+                error.response.data.message.general[0] || "Unable to Download"
+            );
         }
     };
 
@@ -137,9 +140,7 @@ const App = () => {
                                         className={styles.copyButton}
                                         onClick={() => handleDownload(code)}
                                     >
-                                        <FaDownload
-                                            style={{ marginRight: "8px" }}
-                                        />
+                                        <FaDownload />
                                     </button>
                                 </div>
                             ))}
